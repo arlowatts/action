@@ -28,7 +28,7 @@ public class Main extends Application {
 
         drawShapes(gc);
 
-        Player player = new Player(50, 90, 500, 0);
+        Player player = new Player(500, 0, 50, 90);
         player.addShapes(gc);
 
         root.getChildren().add(canvas);
