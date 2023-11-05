@@ -27,10 +27,10 @@ public class Main extends Application {
         Canvas canvas = new Canvas(WIDTH, HEIGHT);
         GraphicsContext context = canvas.getGraphicsContext2D();
 
-        drawShapes(context);
-
-        GameObject player = new GameObject(500, 70, 550, 100, 10);
+        GameObject player = new GameObject(new Point2D(500, 70), new Point2D(550, 100), 10);
         player.draw(context);
+
+        drawShapes(context);
 
         root.getChildren().add(canvas);
 
@@ -48,14 +48,14 @@ public class Main extends Application {
     }
 
     private void distanceTest(GraphicsContext context, GameObject object, double x, double y) {
-        double distance = object.getDistance(new Point2D(x, y));
+        double distance = object.getShortestDistance(new Point2D(x, y));
         context.fillOval(x - distance, y - distance, distance * 2, distance * 2);
     }
 
     private void distanceTest2(GraphicsContext context, GameObject object, double x1, double y1, double x2, double y2) {
-        GameObject o = new GameObject(x1, y1, x2, y2, 0);
-        double distance = Math.max(object.getDistance(o), 0.1);
-        GameObject o2 = new GameObject(x1, y1, x2, y2, distance);
+        GameObject o = new GameObject(new Point2D(x1, y1), new Point2D(x2, y2), 0);
+        double distance = Math.max(object.getShortestDistance(o), 0.1);
+        GameObject o2 = new GameObject(new Point2D(x1, y1), new Point2D(x2, y2), distance);
         o2.draw(context);
     }
 
@@ -74,12 +74,9 @@ public class Main extends Application {
         context.strokeArc(10, 160, 30, 30, 45, 240, ArcType.OPEN);
         context.strokeArc(60, 160, 30, 30, 45, 240, ArcType.CHORD);
         context.strokeArc(110, 160, 30, 30, 45, 240, ArcType.ROUND);
-        context.fillPolygon(new double[]{10, 40, 10, 40},
-                       new double[]{210, 210, 240, 240}, 4);
-        context.strokePolygon(new double[]{60, 90, 60, 90},
-                         new double[]{210, 210, 240, 240}, 4);
-        context.strokePolyline(new double[]{110, 140, 110, 140},
-                          new double[]{210, 210, 240, 240}, 4);
+        context.fillPolygon(new double[] { 10, 40, 10, 40 }, new double[] { 210, 210, 240, 240 }, 4);
+        context.strokePolygon(new double[] { 60, 90, 60, 90 }, new double[] { 210, 210, 240, 240 }, 4);
+        context.strokePolyline(new double[] { 110, 140, 110, 140 }, new double[] { 210, 210, 240, 240 }, 4);
     }
 
     public static void main(String[] args) {
