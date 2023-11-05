@@ -1,38 +1,36 @@
 package action;
 
+import action.geometry.LineSegment2D;
 import javafx.geometry.Point2D;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.shape.StrokeLineCap;
 
 /**
- * A GameObject represents a physical surface in the game.
- * All GameObjects are line segments between two points with a radius of 0 or greater.
- * The radius defines a distance from the line segment that is counted as part of the shape.
+ * A GameObject represents a physical surface in the game. All GameObjects are
+ * line segments between two points with a radius of 0 or greater. The radius
+ * defines a distance from the line segment that is counted as part of the
+ * shape.
  */
-public class GameObject {
-    private Point2D a, b, n;
-
-    private double length, radius;
+public class GameObject extends LineSegment2D {
+    private double radius;
 
     /**
-     * Initilalizes a new GameObject.
-     * @param x1 the x coordinate of the first point.
-     * @param y1 the y coordinate of the first point.
-     * @param x2 the x coordinate of the second point.
-     * @param y2 the y coordinate of the second point.
-     * @param radius the radius of the line.
+     * Initialize a new GameObject with the given endpoints and radius.
+     * 
+     * @param a      the first endpoint of the GameObject.
+     * @param b      the second endpoint of the GameObject.
+     * @param radius the radius of the GameObject.
      */
-    public GameObject(double x1, double y1, double x2, double y2, double radius) {
+    public GameObject(Point2D a, Point2D b, double radius) {
+        super(a, b);
         setRadius(radius);
-
-        this.a = new Point2D(x1, y1);
-        this.b = new Point2D(x2, y2);
-
-        update();
     }
 
     /**
-     * Draws the GameObject onto the given GraphicsContext with the current stroke settings except line width and line cap.
+     * Draw the GameObject onto the given GraphicsContext. The current stroke
+     * settings are used except for line width and line cap, which are set just for
+     * this draw call.
+     * 
      * @param context the GraphicsContext to draw to.
      */
     public void draw(GraphicsContext context) {
@@ -40,73 +38,104 @@ public class GameObject {
 
         context.setLineWidth(radius * 2);
         context.setLineCap(StrokeLineCap.ROUND);
-        context.strokeLine(a.getX(), a.getY(), b.getX(), b.getY());
+        context.strokeLine(getA().getX(), getA().getY(), getB().getX(), getB().getY());
 
         context.restore();
     }
 
     /**
-     * Evaluates the shortest distance from the given point to this GameObject.
-     * If the point is inside this GameObject's radius, the distance will be negative.
-     * @param point the point to evaluate the distance to.
-     * @return the shortest distance between the point and this GameObject.
+     * Get the point along the center of this GameObject that is nearest to the
+     * given point.
+     * 
+     * @param point the other point.
+     * @return the point along this GameObject's center that is closest to the given
+     *         point.
      */
-    public double getDistance(Point2D point) {
-        if (length == 0)
-            return a.distance(point) - radius;
+    public Point2D getNearestPoint(Point2D point) {
+        if (getLength() == 0) {
+            return getA();
+        }
 
-        double t = point.subtract(a).dotProduct(n);
+        Point2D c = getB().subtract(getA());
 
-        t = Math.min(Math.max(t, 0), length);
+        double t = point.subtract(getA()).dotProduct(c) / c.dotProduct(c);
 
-        return a.add(n.multiply(t)).distance(point) - radius;
+        t = Math.min(1, Math.max(0, t));
+
+        return getA().add(c.multiply(t));
     }
 
     /**
-     * Evaluates the shortest distance between two non-crossed GameObjects.
-     * If the lines defined by the GameObjects intersect, the distance will not be accurate.
-     * @param line the GameObject to evaluate the distance to.
+     * Get the shortest line segment that touches the center of both GameObjects.
+     * 
+     * @param gameObject the other GameObject.
+     * @return the shortest line segment that touches each GameObject.
+     */
+    public LineSegment2D getShortestLine(GameObject gameObject) {
+        LineSegment2D aToOther = new LineSegment2D(getA(), gameObject.getNearestPoint(getA()));
+        LineSegment2D bToOther = new LineSegment2D(getB(), gameObject.getNearestPoint(getB()));
+        LineSegment2D toOtherA = new LineSegment2D(gameObject.getA(), getNearestPoint(gameObject.getA()));
+        LineSegment2D toOtherB = new LineSegment2D(gameObject.getB(), getNearestPoint(gameObject.getB()));
+
+        LineSegment2D shortestLine = aToOther;
+
+        if (bToOther.getLength() < shortestLine.getLength()) {
+            shortestLine = bToOther;
+        }
+
+        if (toOtherA.getLength() < shortestLine.getLength()) {
+            shortestLine = toOtherA;
+        }
+
+        if (toOtherB.getLength() < shortestLine.getLength()) {
+            shortestLine = toOtherB;
+        }
+
+        return shortestLine;
+    }
+
+    /**
+     * Evaluate the shortest distance from the given point to this GameObject. If
+     * the point is inside this GameObject's radius, the distance will be negative.
+     * 
+     * @param point the point to evaluate the distance to.
+     * @return the shortest distance between the point and this GameObject.
+     */
+    public double getShortestDistance(Point2D point) {
+        return getNearestPoint(point).distance(point) - radius;
+    }
+
+    /**
+     * Evaluate the shortest distance between two non-crossed GameObjects. If the
+     * lines defined by the GameObjects intersect, the distance will not be
+     * accurate.
+     * 
+     * @param gameObject the GameObject to evaluate the distance to.
      * @return the shortest distance between the two GameObjects.
      */
-    public double getDistance(GameObject line) {
-        return Math.min(
-            Math.min(getDistance(line.a), getDistance(line.b)) - line.radius,
-            Math.min(line.getDistance(a), line.getDistance(b)) - radius
-        );
+    public double getShortestDistance(GameObject gameObject) {
+        return getShortestLine(gameObject).getLength() - radius - gameObject.radius;
     }
 
-    private void update() {
-        length = a.distance(b);
-
-        if (length > 0)
-            n = b.subtract(a).multiply(1 / length);
-    }
-
-    public Point2D getA() {
-        return a;
-    }
-
-    public void setA(Point2D a) {
-        this.a = a;
-        update();
-    }
-
-    public Point2D getB() {
-        return b;
-    }
-
-    public void setB(Point2D b) {
-        this.b = b;
-        update();
-    }
-
+    /**
+     * Get the radius of this GameObject.
+     * 
+     * @return the radius of this GameObject.
+     */
     public double getRadius() {
         return radius;
     }
 
+    /**
+     * Set the radius of this GameObject. This method throws an
+     * IllegalArgumentException if the given radius is less than 0.
+     * 
+     * @param radius the new radius of this GameObject.
+     */
     public void setRadius(double radius) {
-        if (radius < 0)
+        if (radius < 0) {
             throw new IllegalArgumentException("radius must not be less than 0.");
+        }
 
         this.radius = radius;
     }
