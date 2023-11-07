@@ -32,19 +32,23 @@ public class Main extends Application {
         root.getChildren().add(canvas);
 
         // Create the MovementControllers in the scene
-        FloatingMovementController player = new FloatingMovementController(new GameObject(new Point2D(500, 70), new Point2D(550, 100), 10), 1);
+        FloatingMovementController player = new FloatingMovementController(new GameObject(new Point2D(500, 50), new Point2D(550, 80), 10), 1);
         player.setVelocity(new Point2D(20, 50));
 
-        FloatingMovementController wall1 = new FloatingMovementController(new GameObject(new Point2D(0, 200), new Point2D(800, 200), 10), 1);
+        FloatingMovementController wall1 = new FloatingMovementController(new GameObject(new Point2D(100, 200), new Point2D(900, 90), 10), 1);
         wall1.setVelocity(new Point2D(60, -10));
 
         StaticMovementController wall2 = new StaticMovementController(new GameObject(new Point2D(300, 300), new Point2D(800, 250), 10));
+
+        FloatingMovementController wall3 = new FloatingMovementController(new GameObject(new Point2D(800, -10), new Point2D(900, 50), 10), 1);
+        wall3.setVelocity(new Point2D(-60, 10));
 
         // Add the new MovementControllers to the Collection
         Collection<MovementController> movementControllers = new ArrayList<>();
         movementControllers.add(player);
         movementControllers.add(wall1);
         movementControllers.add(wall2);
+        movementControllers.add(wall3);
 
         // Initialize the ActionTimer
         ActionTimer timer = new ActionTimer();
