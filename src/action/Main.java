@@ -1,20 +1,22 @@
 package action;
 
+import java.util.ArrayList;
+import java.util.Collection;
+
+import action.movement.MovementController;
+import action.movement.FloatingMovementController;
+import action.movement.StaticMovementController;
+
 import javafx.application.Application;
 import javafx.geometry.Point2D;
 import javafx.stage.Stage;
 
 import javafx.scene.Scene;
 import javafx.scene.Group;
-import javafx.scene.paint.Color;
-import javafx.scene.shape.ArcType;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 
 public class Main extends Application {
-    public static final int FPS = 60;
-    public static final int MS_PER_FRAME = 1000 / FPS;
-
     public static final int WIDTH = 1000;
     public static final int HEIGHT = 500;
 
@@ -27,56 +29,32 @@ public class Main extends Application {
         Canvas canvas = new Canvas(WIDTH, HEIGHT);
         GraphicsContext context = canvas.getGraphicsContext2D();
 
-        GameObject player = new GameObject(new Point2D(500, 70), new Point2D(550, 100), 10);
-        player.draw(context);
-
-        drawShapes(context);
-
         root.getChildren().add(canvas);
 
+        // Create the MovementControllers in the scene
+        FloatingMovementController player = new FloatingMovementController(new GameObject(new Point2D(500, 70), new Point2D(550, 100), 10), 1);
+        player.setVelocity(new Point2D(20, 50));
+
+        FloatingMovementController wall1 = new FloatingMovementController(new GameObject(new Point2D(0, 200), new Point2D(800, 200), 10), 1);
+        wall1.setVelocity(new Point2D(60, -10));
+
+        StaticMovementController wall2 = new StaticMovementController(new GameObject(new Point2D(300, 300), new Point2D(800, 250), 10));
+
+        // Add the new MovementControllers to the Collection
+        Collection<MovementController> movementControllers = new ArrayList<>();
+        movementControllers.add(player);
+        movementControllers.add(wall1);
+        movementControllers.add(wall2);
+
+        // Initialize the ActionTimer
+        ActionTimer timer = new ActionTimer();
+        timer.setObjects(movementControllers);
+        timer.setGraphicsContext(context);
+        timer.start();
+
+        // Show the stage
         primaryStage.setScene(new Scene(root));
         primaryStage.show();
-
-        distanceTest(context, player, 400, 0);
-        distanceTest(context, player, 500, 150);
-        distanceTest(context, player, 500, 0);
-        distanceTest(context, player, 550, 50);
-
-        distanceTest2(context, player, 400, 0, 500, 200);
-        distanceTest2(context, player, 600, 0, 525, 50);
-        distanceTest2(context, player, 510, 90, 550, 200);
-    }
-
-    private void distanceTest(GraphicsContext context, GameObject object, double x, double y) {
-        double distance = object.getShortestDistance(new Point2D(x, y));
-        context.fillOval(x - distance, y - distance, distance * 2, distance * 2);
-    }
-
-    private void distanceTest2(GraphicsContext context, GameObject object, double x1, double y1, double x2, double y2) {
-        GameObject o = new GameObject(new Point2D(x1, y1), new Point2D(x2, y2), 0);
-        double distance = Math.max(object.getShortestDistance(o), 0.1);
-        GameObject o2 = new GameObject(new Point2D(x1, y1), new Point2D(x2, y2), distance);
-        o2.draw(context);
-    }
-
-    private void drawShapes(GraphicsContext context) {
-        context.setFill(Color.GREEN);
-        context.setStroke(Color.BLUE);
-        context.setLineWidth(5);
-        context.strokeLine(40, 10, 10, 40);
-        context.fillOval(10, 60, 30, 30);
-        context.strokeOval(60, 60, 30, 30);
-        context.fillRoundRect(110, 60, 30, 30, 10, 10);
-        context.strokeRoundRect(160, 60, 30, 30, 10, 10);
-        context.fillArc(10, 110, 30, 30, 45, 240, ArcType.OPEN);
-        context.fillArc(60, 110, 30, 30, 45, 240, ArcType.CHORD);
-        context.fillArc(110, 110, 30, 30, 45, 240, ArcType.ROUND);
-        context.strokeArc(10, 160, 30, 30, 45, 240, ArcType.OPEN);
-        context.strokeArc(60, 160, 30, 30, 45, 240, ArcType.CHORD);
-        context.strokeArc(110, 160, 30, 30, 45, 240, ArcType.ROUND);
-        context.fillPolygon(new double[] { 10, 40, 10, 40 }, new double[] { 210, 210, 240, 240 }, 4);
-        context.strokePolygon(new double[] { 60, 90, 60, 90 }, new double[] { 210, 210, 240, 240 }, 4);
-        context.strokePolyline(new double[] { 110, 140, 110, 140 }, new double[] { 210, 210, 240, 240 }, 4);
     }
 
     public static void main(String[] args) {
