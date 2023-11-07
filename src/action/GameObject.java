@@ -1,6 +1,7 @@
 package action;
 
 import action.geometry.LineSegment2D;
+
 import javafx.geometry.Point2D;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.shape.StrokeLineCap;
@@ -8,7 +9,7 @@ import javafx.scene.shape.StrokeLineCap;
 /**
  * A GameObject represents a physical surface in the game. All GameObjects are
  * line segments between two points with a radius of 0 or greater. The radius
- * defines a distance from the line segment that is counted as part of the
+ * defines a distance from the line segment that is considered part of the
  * shape.
  */
 public class GameObject extends LineSegment2D {
@@ -66,16 +67,17 @@ public class GameObject extends LineSegment2D {
     }
 
     /**
-     * Get the shortest line segment that touches the center of both GameObjects.
+     * Get a shortest line segment that touches the center of both GameObjects. The
+     * first endpoint, a, will always lie on this GameObject.
      * 
      * @param gameObject the other GameObject.
-     * @return the shortest line segment that touches each GameObject.
+     * @return a shortest line segment that touches each GameObject.
      */
     public LineSegment2D getShortestLine(GameObject gameObject) {
         LineSegment2D aToOther = new LineSegment2D(getA(), gameObject.getNearestPoint(getA()));
         LineSegment2D bToOther = new LineSegment2D(getB(), gameObject.getNearestPoint(getB()));
-        LineSegment2D toOtherA = new LineSegment2D(gameObject.getA(), getNearestPoint(gameObject.getA()));
-        LineSegment2D toOtherB = new LineSegment2D(gameObject.getB(), getNearestPoint(gameObject.getB()));
+        LineSegment2D toOtherA = new LineSegment2D(getNearestPoint(gameObject.getA()), gameObject.getA());
+        LineSegment2D toOtherB = new LineSegment2D(getNearestPoint(gameObject.getB()), gameObject.getB());
 
         LineSegment2D shortestLine = aToOther;
 
@@ -115,6 +117,16 @@ public class GameObject extends LineSegment2D {
      */
     public double getShortestDistance(GameObject gameObject) {
         return getShortestLine(gameObject).getLength() - radius - gameObject.radius;
+    }
+
+    /**
+     * Shift the entire GameObject by the given 2D vector.
+     * 
+     * @param offset the offset to add to both of this GameObject's endpoints.
+     */
+    public void move(Point2D offset) {
+        setA(getA().add(offset));
+        setB(getB().add(offset));
     }
 
     /**

@@ -52,9 +52,9 @@ public class LineSegment2D {
     }
 
     /**
-     * Set the first endpoint of this LineSegment.
+     * Set the second endpoint of this LineSegment.
      * 
-     * @param a the new first endpoint.
+     * @param b the new second endpoint.
      */
     public void setB(Point2D b) {
         this.b = b;
@@ -68,5 +68,14 @@ public class LineSegment2D {
      */
     public double getLength() {
         return length;
+    }
+
+    /**
+     * Get the direction vector of this LineSegment from A to B.
+     * 
+     * @return this LineSegment's direction.
+     */
+    public Point2D getDirection() {
+        return b.subtract(a).normalize();
     }
 }
