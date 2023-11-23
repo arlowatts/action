@@ -1,6 +1,7 @@
-package action;
+package action.objects;
 
 import action.geometry.LineSegment2D;
+import java.util.Collection;
 
 import javafx.geometry.Point2D;
 import javafx.scene.canvas.GraphicsContext;
@@ -12,19 +13,32 @@ import javafx.scene.shape.StrokeLineCap;
  * defines a distance from the line segment that is considered part of the
  * shape.
  */
-public class GameObject extends LineSegment2D {
-    private double radius;
+public abstract class GameObject extends LineSegment2D {
+    private double radius, mass;
+
+    private Point2D velocity;
 
     /**
-     * Initialize a new GameObject with the given endpoints and radius.
+     * Given the context of all other GameObjects in the scene, apply the
+     * appropriate acceleration to the attached GameObject to resolve collisions.
+     * 
+     * @param gameObjects a Collection of all other GameObjects in the scene.
+     */
+    public abstract void resolveCollisions(Collection<GameObject> gameObjects);
+
+    /**
+     * Initialize a new GameObject with the given endpoints, radius, and mass.
      * 
      * @param a      the first endpoint of the GameObject.
      * @param b      the second endpoint of the GameObject.
      * @param radius the radius of the GameObject.
+     * @param mass   the mass of the GameObject.
      */
-    public GameObject(Point2D a, Point2D b, double radius) {
+    public GameObject(Point2D a, Point2D b, double radius, double mass) {
         super(a, b);
         setRadius(radius);
+        setMass(mass);
+        setVelocity(Point2D.ZERO);
     }
 
     /**
@@ -68,7 +82,7 @@ public class GameObject extends LineSegment2D {
 
     /**
      * Get a shortest line segment that touches the center of both GameObjects. The
-     * first endpoint, a, will always lie on this GameObject.
+     * first endpoint of the new line segment will always lie on this GameObject.
      * 
      * @param gameObject the other GameObject.
      * @return a shortest line segment that touches each GameObject.
@@ -120,6 +134,17 @@ public class GameObject extends LineSegment2D {
     }
 
     /**
+     * Move the object by its current velocity multiplied by the given amount of
+     * time in seconds.
+     * 
+     * @param deltaTime the amount of time by which to move the object, given in
+     *                  seconds.
+     */
+    public void applyVelocity(double deltaTime) {
+        move(getVelocity().multiply(deltaTime));
+    }
+
+    /**
      * Shift the entire GameObject by the given 2D vector.
      * 
      * @param offset the offset to add to both of this GameObject's endpoints.
@@ -146,9 +171,50 @@ public class GameObject extends LineSegment2D {
      */
     public void setRadius(double radius) {
         if (radius < 0) {
-            throw new IllegalArgumentException("radius must not be less than 0.");
+            throw new IllegalArgumentException("radius must greater than or equal to 0");
         }
 
         this.radius = radius;
+    }
+
+    /**
+     * Get the current mass.
+     * 
+     * @return the current mass of this GameObject.
+     */
+    public double getMass() {
+        return mass;
+    }
+
+    /**
+     * Set the mass of this GameObject. This method throws an
+     * IllegalArgumentException is the given mass is 0 or less.
+     * 
+     * @param mass the new mass value.
+     */
+    public void setMass(double mass) {
+        if (mass <= 0) {
+            throw new IllegalArgumentException("mass must be greater than 0");
+        }
+
+        this.mass = mass;
+    }
+
+    /**
+     * Get the current velocity.
+     * 
+     * @return the current velocity of this GameObject.
+     */
+    public Point2D getVelocity() {
+        return velocity;
+    }
+
+    /**
+     * Set the velocity.
+     * 
+     * @param velocity the new velocity value.
+     */
+    public void setVelocity(Point2D velocity) {
+        this.velocity = velocity;
     }
 }

@@ -1,6 +1,6 @@
 package action;
 
-import action.movement.MovementController;
+import action.objects.GameObject;
 
 import java.util.Collection;
 
@@ -9,35 +9,14 @@ import javafx.scene.canvas.GraphicsContext;
 
 /**
  * The ActionTimer class provides an AnimationTimer implementation that handles
- * all GameObject collisions and invokes the methods of their
- * MovementControllers to move them.
+ * all GameObject collisions and invokes their methods to move them.
  */
 public class ActionTimer extends AnimationTimer {
     private long previousNow = 0;
 
-    private Collection<MovementController> movementControllers;
+    private Collection<GameObject> gameObjects;
 
     private GraphicsContext context;
-
-    /**
-     * Update the Collection of MovementControllers this ActionTimer executes each
-     * frame.
-     * 
-     * @param movementControllers the new Collection of MovementControllers to
-     *                            override the previous value.
-     */
-    public void setObjects(Collection<MovementController> movementControllers) {
-        this.movementControllers = movementControllers;
-    }
-
-    /**
-     * Set the GraphicsContext this ActionTimer draws each frame to.
-     * 
-     * @param context the new GraphicsContext.
-     */
-    public void setGraphicsContext(GraphicsContext context) {
-        this.context = context;
-    }
 
     public void handle(long now) {
         if (previousNow == 0)
@@ -48,13 +27,51 @@ public class ActionTimer extends AnimationTimer {
 
         context.clearRect(0, 0, context.getCanvas().getWidth(), context.getCanvas().getHeight());
 
-        for (MovementController movementController : movementControllers) {
-            movementController.resolveCollisions(movementControllers);
+        // Resolve all collisions in the scene
+        for (GameObject gameObject : gameObjects) {
+            gameObject.resolveCollisions(gameObjects);
         }
 
-        for (MovementController movementController : movementControllers) {
-            movementController.applyMovement(deltaTime);
-            movementController.getGameObject().draw(context);
+        // Move and draw the objects
+        for (GameObject gameObject : gameObjects) {
+            gameObject.applyVelocity(deltaTime);
+            gameObject.draw(context);
         }
+    }
+
+    /**
+     * Access the Collection of GameObjects referenced by this ActionTimer.
+     * 
+     * @return the Collection of GameObjects.
+     */
+    public Collection<GameObject> getGameObjects() {
+        return gameObjects;
+    }
+
+    /**
+     * Update the Collection of GameObjects referenced by this ActionTimer.
+     * 
+     * @param gameObjects the new Collection of GameObjects.
+     */
+    public void setGameObjects(Collection<GameObject> gameObjects) {
+        this.gameObjects = gameObjects;
+    }
+
+    /**
+     * Access the GraphicsContext referenced by this ActionTimer.
+     * 
+     * @return the GraphicsContext.
+     */
+    public GraphicsContext getContext() {
+        return context;
+    }
+
+    /**
+     * Update the GraphicsContext referenced by this ActionTimer.
+     * 
+     * @param context the new GraphicsContext.
+     */
+    public void setContext(GraphicsContext context) {
+        this.context = context;
     }
 }
