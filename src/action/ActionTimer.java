@@ -1,5 +1,6 @@
 package action;
 
+import action.movement.MovementController;
 import action.objects.GameObject;
 
 import java.util.Collection;
@@ -15,6 +16,7 @@ public class ActionTimer extends AnimationTimer {
     private long previousNow = 0;
 
     private Collection<GameObject> gameObjects;
+    private Collection<MovementController> movementControllers;
 
     private GraphicsContext context;
 
@@ -26,6 +28,11 @@ public class ActionTimer extends AnimationTimer {
         previousNow = now;
 
         context.clearRect(0, 0, context.getCanvas().getWidth(), context.getCanvas().getHeight());
+
+        // Apply all MovementControllers
+        for (MovementController movementController : movementControllers) {
+            movementController.applyMovement(deltaTime);
+        }
 
         // Resolve all collisions in the scene
         for (GameObject gameObject : gameObjects) {
@@ -55,6 +62,24 @@ public class ActionTimer extends AnimationTimer {
      */
     public void setGameObjects(Collection<GameObject> gameObjects) {
         this.gameObjects = gameObjects;
+    }
+
+    /**
+     * Access the Collection of MovementControllers referenced by this ActionTimer.
+     * 
+     * @return the Collection of MovementControllers.
+     */
+    public Collection<MovementController> getMovementControllers() {
+        return movementControllers;
+    }
+
+    /**
+     * Update the Collection of MovementControllers referenced by this ActionTimer.
+     * 
+     * @param gameObjects the new Collection of MovementControllers.
+     */
+    public void setMovementControllers(Collection<MovementController> movementControllers) {
+        this.movementControllers = movementControllers;
     }
 
     /**

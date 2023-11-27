@@ -3,6 +3,8 @@ package action;
 import java.util.ArrayList;
 import java.util.Collection;
 
+import action.movement.MovementController;
+import action.movement.PlayerController;
 import action.objects.FallingObject;
 import action.objects.FloatingObject;
 import action.objects.GameObject;
@@ -14,6 +16,7 @@ import javafx.scene.Scene;
 import javafx.scene.Group;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.input.KeyCode;
 
 public class Main extends Application {
     public static final int WIDTH = 1000;
@@ -27,6 +30,7 @@ public class Main extends Application {
         Group root = new Group();
         Canvas canvas = new Canvas(WIDTH, HEIGHT);
         GraphicsContext context = canvas.getGraphicsContext2D();
+        Scene scene = new Scene(root);
 
         root.getChildren().add(canvas);
 
@@ -44,21 +48,27 @@ public class Main extends Application {
         FloatingObject wall3 = new FloatingObject(new Point2D(800, -10), new Point2D(900, 50), 10, 1);
         wall3.setVelocity(new Point2D(-60, 10));
 
+        MovementController playerController = new PlayerController(player, 500, scene, KeyCode.W, KeyCode.S, KeyCode.A, KeyCode.D);
+
         // Add the new MovementControllers to the Collection
-        Collection<GameObject> gameObject = new ArrayList<>();
-        gameObject.add(player);
+        Collection<GameObject> gameObjects = new ArrayList<>();
+        gameObjects.add(player);
         // gameObject.add(wall1);
-        gameObject.add(wall2);
-        gameObject.add(wall3);
+        gameObjects.add(wall2);
+        gameObjects.add(wall3);
+
+        Collection<MovementController> movementControllers = new ArrayList<>();
+        movementControllers.add(playerController);
 
         // Initialize the ActionTimer
         ActionTimer timer = new ActionTimer();
-        timer.setGameObjects(gameObject);
+        timer.setGameObjects(gameObjects);
+        timer.setMovementControllers(movementControllers);
         timer.setContext(context);
         timer.start();
 
         // Show the stage
-        primaryStage.setScene(new Scene(root));
+        primaryStage.setScene(scene);
         primaryStage.show();
     }
 
