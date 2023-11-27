@@ -14,7 +14,20 @@ public class PlayerController implements MovementController {
 
     private boolean up, down, left, right;
 
-    public PlayerController(GameObject gameObject, double speed, Scene scene, KeyCode upKey, KeyCode downKey, KeyCode leftKey, KeyCode rightKey) {
+    /**
+     * Create a new PlayerController with the specified GameObject, speed, scene,
+     * and keys.
+     * 
+     * @param gameObject the GameObject to apply the movement to.
+     * @param speed      the speed of the movement, in pixels per second squared.
+     * @param scene      the current scene in which to check for key press events.
+     * @param upKey      the key associated with upward movement.
+     * @param downKey    the key associated with downward movement.
+     * @param leftKey    the key associated with leftward movement.
+     * @param rightKey   the key associated with rightward movement.
+     */
+    public PlayerController(GameObject gameObject, double speed, Scene scene, KeyCode upKey, KeyCode downKey,
+            KeyCode leftKey, KeyCode rightKey) {
         this.gameObject = gameObject;
         this.speed = speed;
 
@@ -60,7 +73,8 @@ public class PlayerController implements MovementController {
         double totalUp = ((up ? 1 : 0) - (down ? 1 : 0)) * speed * deltaTime;
         double totalRight = ((right ? 1 : 0) - (left ? 1 : 0)) * speed * deltaTime;
 
-        // totalUp must be negated because lower y coordinates appear higher on the screen
+        // totalUp must be negated because lower y coordinates appear higher on the
+        // screen
         Point2D newVelocity = gameObject.getVelocity().add(totalRight, -totalUp);
 
         gameObject.setVelocity(newVelocity);
